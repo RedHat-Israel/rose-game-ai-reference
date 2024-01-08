@@ -1,5 +1,5 @@
 # Project variables
-IMAGE_NAME ?= quay.io/rose/rose-game-ai
+IMAGE_NAME ?= quay.io/rose/rose-game-ai-reference
 PORT ?= 8081
 
 build-image:
