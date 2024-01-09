@@ -10,13 +10,9 @@ Trained models are expected to be in the checkpoints directory.
 """
 
 import os
-import sys
 
 # Get the directory of the current script
 script_directory = os.path.dirname(os.path.abspath(__file__))
-
-# Add the script directory to the system path
-sys.path.append(script_directory)
 
 # Try to import pytorch
 try:
@@ -26,7 +22,7 @@ except ImportError:
     print("       see: https://pytorch.org/get-started/locally/")
     exit()
 
-from model import DriverModel, outputs_to_action, view_to_inputs
+from model import DriverModel, outputs_to_action, view_to_inputs  # noqa: E402
 
 """
 Torch Car

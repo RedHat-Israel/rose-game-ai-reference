@@ -9,8 +9,6 @@ This driver requires PyTorch to be installed, see: https://pytorch.org/get-start
 Trained models are expected to be in the checkpoints directory.
 """
 
-import os
-
 try:
     import torch
 except ImportError:
@@ -75,6 +73,7 @@ class DriverModel(nn.Module):
     Note:
     - The model expects a flattened version of the 3x4x7 input tensor, which should be reshaped to (batch_size, 84) before being passed to the model.
     """
+
     def __init__(self):
         super(DriverModel, self).__init__()
 
