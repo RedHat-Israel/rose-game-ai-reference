@@ -1,5 +1,5 @@
-from game.car import Car
-from game.track import Track
+from rose.ai.car import Car
+from rose.ai.track import Track
 
 
 def create(game_data):

@@ -2,26 +2,24 @@ import argparse
 import importlib.util
 import logging
 
-from game import server
+from rose.ai import server
 
 
 def load_driver_module(driver_path):
     """
     Load the driver module from the specified path.
 
-    :param driver_path: Path to the driver module.
-    :return: The loaded module.
-    :raises ImportError: If there's an issue loading the module.
+    Arguments:
+      file_path (str): The path to the driver module
+    Returns:
+        Driver module (module)
+    Raises:
+        Exception if the module cannot be loaded
     """
-    try:
-        spec = importlib.util.spec_from_file_location("driver_module", driver_path)
-        driver_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(driver_module)
-        return driver_module
-    except Exception as e:
-        raise ImportError(
-            f"Error loading driver module from path {driver_path}: {str(e)}"
-        )
+    spec = importlib.util.spec_from_file_location("driver_module", driver_path)
+    driver_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(driver_module)
+    return driver_module
 
 
 def main():
