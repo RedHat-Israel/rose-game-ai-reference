@@ -1,5 +1,5 @@
 # rose-game-ai
-[ROSE game](https://github.com/RedHat-Israel/ROSE) template for self driving AI module.
+[ROSE game](https://github.com/RedHat-Israel/ROSE) example of a machine learining self driving car module.
 
 This is a reference implementation of a self driving modules for the ROSE game.
 
