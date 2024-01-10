@@ -1,4 +1,4 @@
-# rose-game-ai
+# rose-game-ai-reference
 [ROSE game](https://github.com/RedHat-Israel/ROSE) example of a machine learining self driving car module.
 
 This is a reference implementation of a self driving modules for the ROSE game.
