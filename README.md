@@ -1,32 +1,67 @@
 # rose-game-ai
-Reference AI driver for the ROSE game using machine learning.
+[ROSE game](https://github.com/RedHat-Israel/ROSE) template for self driving AI module.
+
+This is a reference implementation of a self driving modules for the ROSE game.
+
+This example uses machine learning algorithms, and requires [pytorch](https://pytorch.org/) when running locally.
+
+<p align="center">
+  <img src="ai.png" alt="rose game components diagram" width="400"/>
+</p>
 
 ROSE project: https://github.com/RedHat-Israel/ROSE
 
-Run the driver:
+## Requirements
 
-``` bash
-# Get help
-podman run --rm --network host -it quay.io/rose/rose-game-ai-reference:latest --help
+ Requires | Version | |
+----------|---------| ---- |
+ Podman (or Docker) | >= 4.8 | For running containerized |
+ Python   | >= 3.9  | For running the code loally |
 
-# Run the driver on localhost port 8082 (default port in 8081)
-podman run --rm --network host -it quay.io/rose/rose-game-ai-reference:latest --port 8082
-```
+## ROSE game components
 
-Run the server:
+Component | Reference |
+----------|-----------|
+Game engine | https://github.com/RedHat-Israel/rose-game-engine |
+Game web based user interface | https://github.com/RedHat-Israel/rose-game-web-ui |
+Game car driving module | https://github.com/RedHat-Israel/rose-game-ai |
 
-``` bash
-# Start the ROSE game server, and connect to the Go driver
-podman run --rm \
-  --network host \
-  -it quay.io/rose/rose-server:latest \
-  --drivers http://127.0.0.1:8082
-```
+## Running a self driving module
 
-Run locally:
+Clone this repository, and make sure you have a game engine running.
+
+Write your own driving module, you can use the file `mydriver.py`:
 
 ```bash
-python client/main.py -d ./driver.py
+vi mydriver.py
 ```
 
-Browse to http://127.0.0.1:8880 to run the game.
+Run using `mydriver.py` as the driving module:
+
+```bash
+make run
+```
+
+## Running ROSE game components containerized
+
+### Running the game engine ( on http://127.0.0.1:8880 )
+
+``` bash
+podman run --rm --network host -it quay.io/rose/rose-game-engine:latest
+```
+
+### Running the game web based user interface ( on http://127.0.0.1:8080 )
+
+``` bash
+podman run --rm --network host -it quay.io/rose/rose-game-web-ui:latest
+```
+
+### Running your self driving module, requires a local `driver.py` file with your driving module. ( on http://127.0.0.1:8081 )
+
+``` bash
+# NOTE: will mount mydriver.py from local directory into the container file system
+podman run --rm --network host -it \
+  -v $(pwd)/mydriver.py:/mydriver.py:z \
+  -e DRIVER /mydriver.py \
+  quay.io/rose/rose-game-ai:latest
+```
