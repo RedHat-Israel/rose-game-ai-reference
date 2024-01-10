@@ -10,6 +10,7 @@ This example uses machine learning algorithms, and requires [pytorch](https://py
 </p>
 
 ROSE project: https://github.com/RedHat-Israel/ROSE
+ROSE self driving car module template: https://github.com/RedHat-Israel/rose-game-ai
 
 ## Requirements
 
