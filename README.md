@@ -35,7 +35,7 @@ Self driving car module example | https://github.com/RedHat-Israel/rose-game-ai-
 podman run --rm --network host -it quay.io/rose/rose-game-ai-reference:latest
 ```
 
-## Running a self driving module
+## Running a self driving module locally
 
 Clone this repository, and make sure you have a game engine running.
 
