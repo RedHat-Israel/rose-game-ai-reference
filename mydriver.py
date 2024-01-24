@@ -123,6 +123,6 @@ def drive(world):
     output = model(input_tensor)
 
     # Convert the output tensor into a real world response
-    action = outputs_to_action(output, world)
+    action = outputs_to_action(output)
 
     return action

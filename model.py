@@ -61,7 +61,7 @@ class DriverModel(nn.Module):
     - Hidden Layer 3: 128 neurons, followed by batch normalization and 50% dropout.
     - Hidden Layer 4: 64 neurons, followed by batch normalization and 50% dropout.
     - Hidden Layer 5: 32 neurons, followed by batch normalization and 50% dropout.
-    - Output Layer: 3 neurons, representing the possible driving decisions (e.g., left, forward, right).
+    - Output Layer: 7 neurons, representing the possible driving actions (e.g., obstacles.ALL).
 
     Activation Function:
     - ReLU activation function is used for all hidden layers.
@@ -97,7 +97,7 @@ class DriverModel(nn.Module):
         self.bn5 = nn.BatchNorm1d(32)
         self.dropout5 = nn.Dropout(0.5)
 
-        self.fc6 = nn.Linear(32, 3)
+        self.fc6 = nn.Linear(32, 7)
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -156,16 +156,14 @@ def view_to_inputs(array, car_lane):
     return torch.cat((world_tensor, car_lane_tensor))
 
 
-def outputs_to_action(output, world):
+def outputs_to_action(output):
     """
     Convert the model's output tensor into a driving action based on the current state of the world.
 
-    The function first determines the car's intended position (left, forward, right) based on the model's output.
-    If the position is forward, the function checks the obstacle in front of the car and maps it to an appropriate action.
+    The function determines the car's intended action (left, forward, right) based on the model's output.
 
     Args:
         output (torch.Tensor): The model's output tensor, typically representing probabilities for each position.
-        world (World): An instance of the World class providing read-only access to the current game state.
 
     Returns:
         str: The determined action for the car to take. Possible actions include those defined in the `actions` class.
@@ -173,23 +171,10 @@ def outputs_to_action(output, world):
     Notes:
         The function uses a predefined mapping of obstacles to actions to determine the appropriate action when moving forward.
     """
-    positions = ["left", "forward", "right"]
-    obstacle_action_map = {
-        obstacles.PENGUIN: actions.PICKUP,
-        obstacles.CRACK: actions.JUMP,
-        obstacles.WATER: actions.BRAKE,
-    }
-
-    obstacle = world.get((world.car.x, world.car.y - 1))
     position_index = torch.argmax(output).item()
-    position = positions[position_index]
+    action = actions.ALL[position_index]
 
-    if position == "left":
-        return actions.LEFT
-    elif position == "right":
-        return actions.RIGHT
-    else:
-        return obstacle_action_map.get(obstacle, actions.NONE)
+    return action
 
 
 def action_to_outputs(action):
@@ -206,13 +191,13 @@ def action_to_outputs(action):
     Returns:
         torch.Tensor: A tensor of shape (3,) where the element corresponding to the given action is 1, and the others are 0.
     """
-    target = torch.zeros(3)
+    target = torch.zeros(7)
 
-    if action == actions.LEFT:
-        target[0] = 1
-    elif action == actions.RIGHT:
-        target[2] = 1
-    else:
-        target[1] = 1
+    try:
+        action_index = actions.ALL.index(action)
+    except ValueError:
+        action_index = 0
+
+    target[action_index] = 1
 
     return target
