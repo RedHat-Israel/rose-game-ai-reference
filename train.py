@@ -84,16 +84,22 @@ def driver_simulator(array, car_x):
     """
     obstacle = array[3][car_x]
 
-    if obstacle == obstacles.PENGUIN:
-        return actions.PICKUP
-    elif obstacle == obstacles.WATER:
-        return actions.BRAKE
-    elif obstacle == obstacles.CRACK:
-        return actions.JUMP
-    elif obstacle == obstacles.NONE:
-        return actions.NONE
-    else:
-        return actions.RIGHT if (car_x % 3) == 0 else actions.LEFT
+    # Define a dictionary to map obstacles to actions
+    action_map = {
+        obstacles.PENGUIN: actions.PICKUP,
+        obstacles.WATER: actions.BRAKE,
+        obstacles.CRACK: actions.JUMP,
+        obstacles.NONE: actions.NONE,
+    }
+
+    # Determine the action based on the obstacle
+    action = action_map.get(obstacle)
+
+    # If the obstacle is not in the dictionary, determine the action based on the car's x position
+    if action is None:
+        action = actions.RIGHT if (car_x % 3) == 0 else actions.LEFT
+
+    return action
 
 
 def generate_batch(batch_size):
@@ -166,10 +172,10 @@ if __name__ == "__main__":
         "--checkpoint-out", default="", help="Path to the output checkpoint file."
     )
     parser.add_argument(
-        "--num-epochs", type=int, default=10, help="Number of epochs for training."
+        "--num-epochs", type=int, default=25, help="Number of epochs for training."
     )
     parser.add_argument(
-        "--batch-size", type=int, default=200, help="Batch size for training."
+        "--batch-size", type=int, default=250, help="Batch size for training."
     )
     parser.add_argument(
         "--learning-rate", type=float, default=0.001, help="Learning rate for training."
