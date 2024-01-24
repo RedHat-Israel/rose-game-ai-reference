@@ -56,16 +56,16 @@ model = DriverModel()
 
 def generate_obstacle_array():
     """
-    Generates a 4x3 2D array with random obstacles.
+    Generates a 4x6 2D array with random obstacles.
 
     Returns:
-        list[list[str]]: 4x3 2D array with random obstacles.
+        list[list[str]]: 4x6 2D array with random obstacles.
     """
-    array = [["" for _ in range(3)] for _ in range(4)]
+    array = [["" for _ in range(6)] for _ in range(4)]
 
     for i in range(4):
         obstacle = random.choice(list(OBSTACLE_TO_INDEX.keys()))
-        position = random.randint(0, 2)
+        position = random.randint(0, 5)
         array[i][position] = obstacle
 
     return array
@@ -115,7 +115,7 @@ def generate_batch(batch_size):
     inputs = []
     targets = []
     for _ in range(batch_size):
-        car_x = random.choice([0, 1, 2])
+        car_x = random.choice([0, 1, 2, 3, 4, 5])
         array = generate_obstacle_array()
         correct_output = driver_simulator(array, car_x)
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         "--checkpoint-out", default="", help="Path to the output checkpoint file."
     )
     parser.add_argument(
-        "--num-epochs", type=int, default=25, help="Number of epochs for training."
+        "--num-epochs", type=int, default=100, help="Number of epochs for training."
     )
     parser.add_argument(
         "--batch-size", type=int, default=250, help="Batch size for training."

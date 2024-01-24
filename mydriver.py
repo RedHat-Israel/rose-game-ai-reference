@@ -48,15 +48,13 @@ model.eval()
 # ----------------------------------------------------------------------------------
 
 
-def build_lane_view(world, height, lane):
+def build_lane_view(world):
     """
     Build a 3xN 2D array representation of the world based on the car's lane and x position.
 
     Args:
         world (World): An instance of the World class providing read-only
                        access to the current game state.
-        height (int): The height of the returned 2D array.
-        lane (int) : The car's current lane, 0 or 1. This determines the starting x-coordinate for the 2D array.
 
     Returns:
         list[list[str]]: 3xN array representation of the world view from the car, where N is the specified height.
@@ -68,10 +66,8 @@ def build_lane_view(world, height, lane):
         The starting x-coordinate is determined by the car's lane. If the lane is 0, the starting x is 0. If the lane is 1, the starting x is 3.
         The function also provides a wrapper around world.get to handle negative y values, returning an empty string for such cases.
     """
+    height = 4
     car_y = world.car.y
-
-    # Determine the starting x-coordinate for the 2D array based on the car's x position
-    start_x = 0 if lane == 0 else 3
 
     # Calculate the starting y-coordinate based on the car's y position and the desired height
     start_y = car_y - height
@@ -83,9 +79,7 @@ def build_lane_view(world, height, lane):
         return world.get((j, i))
 
     # Generate the 2D array from start_y up to world.car.y
-    array = [
-        [get_value(j + start_x, i) for j in [0, 1, 2]] for i in range(start_y, car_y)
-    ]
+    array = [[get_value(j, i) for j in range(6)] for i in range(start_y, car_y)]
 
     return array
 
@@ -94,30 +88,15 @@ def drive(world):
     """
     Determine the appropriate driving action based on the current state of the world.
 
-    The function first constructs a 3xN 2D view of the world based on the car's position.
-    This view is then converted to an input tensor format suitable for the model.
-    Depending on the car's x position within its lane, the function uses one of two models (`model_x1` or `model_x0`)
-    to predict the best action. If the world view was flipped (because the car is on the rightmost side of its lane),
-    the action might be flipped back (e.g., from LEFT to RIGHT or vice versa).
-
     Args:
         world (World): An instance of the World class providing read-only access to the current game state.
 
     Returns:
         str: The determined action for the car to take. Possible actions include those defined in the `actions` class.
-
-    Notes:
-        The function uses two models (`model_x1` and `model_x0`) to predict actions based on the car's x position within its lane.
-        The `flip_world` flag determines if the world view was flipped horizontally, which affects the final action decision.
     """
-    view_height = 4
-
-    lane = 0 if world.car.x < 3 else 1
-    x_in_lane = world.car.x % 3
-
     # Convert real world input, into a tensor
-    view = build_lane_view(world, view_height, lane)
-    input_tensor = view_to_inputs(view, x_in_lane).unsqueeze(0)
+    view = build_lane_view(world)
+    input_tensor = view_to_inputs(view, world.car.x).unsqueeze(0)
 
     # Use neural network model to get the outputs tensor
     output = model(input_tensor)
