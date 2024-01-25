@@ -61,7 +61,7 @@ class DriverModel(nn.Module):
     - Hidden Layer 3: 128 neurons, followed by batch normalization and 50% dropout.
     - Hidden Layer 4: 64 neurons, followed by batch normalization and 50% dropout.
     - Hidden Layer 5: 32 neurons, followed by batch normalization and 50% dropout.
-    - Output Layer: 7 neurons, representing the possible driving actions (e.g., obstacles.ALL).
+    - Output Layer: 6 neurons, representing the possible driving actions (e.g., obstacles.ALL).
 
     Activation Function:
     - ReLU activation function is used for all hidden layers.
@@ -97,7 +97,7 @@ class DriverModel(nn.Module):
         self.bn5 = nn.BatchNorm1d(32)
         self.dropout5 = nn.Dropout(0.5)
 
-        self.fc6 = nn.Linear(32, 7)
+        self.fc6 = nn.Linear(32, 6)
 
     def forward(self, x):
         x = F.relu(self.bn1(self.fc1(x)))
@@ -136,21 +136,19 @@ def view_to_inputs(array, car_lane):
     Notes:
         The function uses a predefined mapping of obstacles to indices for the one-hot encoding.
     """
-    OBSTACLE_TO_INDEX = {
-        obstacle: index for index, obstacle in enumerate(obstacles.ALL)
-    }
-
     height = len(array)
     width = len(array[0])
-    tensor = torch.zeros((height, width, 7))
+    num_obstacles = len(obstacles.ALL)
+
+    tensor = torch.zeros((height, width, num_obstacles))
 
     for i in range(height):
         for j in range(width):
             obstacle = array[i][j]
-            tensor[i, j, OBSTACLE_TO_INDEX[obstacle]] = 1
+            tensor[i, j, obstacles.ALL.index(obstacle)] = 1
 
     world_tensor = tensor.view(-1)
-    car_lane_tensor = torch.zeros(6)
+    car_lane_tensor = torch.zeros(width)
     car_lane_tensor[car_lane] = 1
 
     return torch.cat((world_tensor, car_lane_tensor))
