@@ -142,7 +142,7 @@ def generate_batch(batch_size):
     targets = []
 
     for _ in range(batch_size):
-        car_x = random.choice([0, 1, 2, 3, 4, 5])
+        car_x = random.randint(0, 5)
         array = generate_obstacle_array()
         correct_output = driver_simulator(array, car_x)
 
