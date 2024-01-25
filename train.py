@@ -44,48 +44,46 @@ optimizer = None
 model = DriverModel()
 
 
-def generate_obstacle_array():
+def generate_obstacle_array(width=6, height=4):
     """
-    Generates a 4x6 2D array with random obstacles.
+    Generates a 2D array with random obstacles.
+
+    Parameters:
+        width (int): The width of the 2D array. Default is 6.
+        height (int): The height of the 2D array. Default is 4.
 
     Returns:
-        list[list[str]]: 4x6 2D array with random obstacles.
+        list[list[str]]: 2D array with random obstacles.
     """
-    OBSTACLE_TO_INDEX = {
-        "": 0,
-        "crack": 1,
-        "trash": 2,
-        "penguin": 3,
-        "bike": 4,
-        "water": 5,
-        "barrier": 6,
-    }
+    OBSTACLES = ["", "crack", "trash", "penguin", "bike", "water", "barrier"]
 
-    array = [["" for _ in range(6)] for _ in range(4)]
+    array = [["" for _ in range(width)] for _ in range(height)]
 
-    for i in range(4):
-        obstacle = random.choice(list(OBSTACLE_TO_INDEX.keys()))
-        position = random.randint(0, 2)
+    for i in range(height):
+        obstacle = random.choice(OBSTACLES)
+        position = random.randint(0, width // 2 - 1)
         # lane A
         array[i][position] = obstacle
         # lane B
-        array[i][3 + position] = obstacle
+        array[i][width // 2 + position] = obstacle
 
     return array
 
 
-def driver_simulator(array, car_x):
+def driver_simulator(array, car_x, width=6, height=4):
     """
     Simulates the driver's decision based on the obstacle in front of the car.
 
     Args:
         array (list[list[str]]): 2D array representation of the world with obstacles as strings.
         car_x (int): The car's x position.
+        width (int): The width of the 2D array. Default is 6.
+        height (int): The height of the 2D array. Default is 4.
 
     Returns:
         str: The determined action for the car to take. Possible actions include those defined in the `actions` class.
     """
-    obstacle = array[3][car_x]
+    obstacle = array[height - 1][car_x]
 
     # Define a dictionary to map obstacles to actions
     action_map = {
@@ -100,7 +98,7 @@ def driver_simulator(array, car_x):
 
     # If the obstacle is not in the dictionary, determine the action based on the car's x position
     if action is None:
-        action = actions.RIGHT if (car_x % 3) == 0 else actions.LEFT
+        action = actions.RIGHT if (car_x % (width // 2)) == 0 else actions.LEFT
 
     return action
 
@@ -109,17 +107,16 @@ def action_to_outputs(action):
     """
     Converts an action into a target tensor.
 
-    This function takes an action (LEFT, RIGHT, or other) and converts it into a target tensor with three elements.
-    The tensor's elements correspond to the actions LEFT, forward, and RIGHT respectively. The element corresponding
-    to the given action is set to 1, and the others are set to 0.
+    This function takes an action (LEFT, RIGHT, or other) and converts it into a target tensor with elements corresponding to the actions.
+    The element corresponding to the given action is set to 1, and the others are set to 0.
 
     Args:
         action (str): The action to convert. Should be one of the actions defined in the `actions` class.
 
     Returns:
-        torch.Tensor: A tensor of shape (3,) where the element corresponding to the given action is 1, and the others are 0.
+        torch.Tensor: A tensor of shape (len(actions.ALL),) where the element corresponding to the given action is 1, and the others are 0.
     """
-    target = torch.zeros(7)
+    target = torch.zeros(len(actions.ALL))
 
     try:
         action_index = actions.ALL.index(action)
@@ -143,6 +140,7 @@ def generate_batch(batch_size):
     """
     inputs = []
     targets = []
+
     for _ in range(batch_size):
         car_x = random.choice([0, 1, 2, 3, 4, 5])
         array = generate_obstacle_array()
@@ -153,6 +151,7 @@ def generate_batch(batch_size):
 
         inputs.append(input_tensor)
         targets.append(target_tensor)
+
     return torch.stack(inputs), torch.stack(targets)
 
 
