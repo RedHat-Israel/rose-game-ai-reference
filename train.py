@@ -65,8 +65,8 @@ def generate_obstacle_array():
 
     for i in range(4):
         obstacle = random.choice(list(OBSTACLE_TO_INDEX.keys()))
-        # lane A
         position = random.randint(0, 2)
+        # lane A
         array[i][position] = obstacle
         # lane B
         array[i][3 + position] = obstacle
