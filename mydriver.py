@@ -50,36 +50,28 @@ model.eval()
 
 def build_lane_view(world):
     """
-    Build a 3xN 2D array representation of the world based on the car's lane and x position.
+    Build a 6x4 2D array representation of the world based on the car's lane and x position.
 
     Args:
         world (World): An instance of the World class providing read-only
                        access to the current game state.
 
     Returns:
-        list[list[str]]: 3xN array representation of the world view from the car, where N is the specified height.
+        list[list[str]]: 6x4 array representation of the world view from the car, where 4 is the specified height.
                           The bottom line is one line above the car's y position, and the top line is the line height lines above that.
                           The array provides a view of the world from the car's perspective, with the car's y position excluded.
 
     Notes:
         The function uses the car's y position to determine the vertical range of the 2D array.
-        The starting x-coordinate is determined by the car's lane. If the lane is 0, the starting x is 0. If the lane is 1, the starting x is 3.
-        The function also provides a wrapper around world.get to handle negative y values, returning an empty string for such cases.
     """
     height = 4
+    width = 6
     car_y = world.car.y
 
-    # Calculate the starting y-coordinate based on the car's y position and the desired height
-    start_y = car_y - height
-
-    # Wrapper around world.get to handle negative y values
-    def get_value(j, i):
-        if i < 0:
-            return ""
-        return world.get((j, i))
-
     # Generate the 2D array from start_y up to world.car.y
-    array = [[get_value(j, i) for j in range(6)] for i in range(start_y, car_y)]
+    array = [
+        [world.get((j, i)) for j in range(width)] for i in range(car_y - height, car_y)
+    ]
 
     return array
 
