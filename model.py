@@ -175,29 +175,3 @@ def outputs_to_action(output):
     action = actions.ALL[position_index]
 
     return action
-
-
-def action_to_outputs(action):
-    """
-    Converts an action into a target tensor.
-
-    This function takes an action (LEFT, RIGHT, or other) and converts it into a target tensor with three elements.
-    The tensor's elements correspond to the actions LEFT, forward, and RIGHT respectively. The element corresponding
-    to the given action is set to 1, and the others are set to 0.
-
-    Args:
-        action (str): The action to convert. Should be one of the actions defined in the `actions` class.
-
-    Returns:
-        torch.Tensor: A tensor of shape (3,) where the element corresponding to the given action is 1, and the others are 0.
-    """
-    target = torch.zeros(7)
-
-    try:
-        action_index = actions.ALL.index(action)
-    except ValueError:
-        action_index = 0
-
-    target[action_index] = 1
-
-    return target
