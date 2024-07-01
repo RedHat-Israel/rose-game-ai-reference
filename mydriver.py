@@ -90,8 +90,8 @@ def drive(world):
     view = build_lane_view(world)
     input_tensor = view_to_inputs(view, world.car.x).unsqueeze(0)
 
-    # Use neural network model to get the outputs tensor
-    output = model(input_tensor)
+    # Forward propagte the inputs in the neural network model to get the outputs tensor
+    output = model.forward(input_tensor)
 
     # Convert the output tensor into a real world response
     action = outputs_to_action(output)
