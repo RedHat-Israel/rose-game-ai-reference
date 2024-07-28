@@ -39,6 +39,14 @@ podman run --rm --network host -it quay.io/rose/rose-game-ai-reference:latest
 
 Clone this repository, and make sure you have a game engine running.
 
+Install requirements:
+
+```bash
+# Install requirements
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
 Write your own driving module, you can use the file `mydriver.py`:
 
 ```bash
@@ -48,7 +56,7 @@ vi mydriver.py
 Run using `mydriver.py` as the driving module:
 
 ```bash
-make run
+python main.py --driver mydriver.py
 ```
 
 ## Running ROSE game components containerized
