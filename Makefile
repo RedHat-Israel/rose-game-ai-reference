@@ -29,7 +29,7 @@ test:
 
 run:
 	@echo "Running driver logic server ..."
-	PYTHONPATH=$(SRC_DIR):$$PYTHONPATH python rose/main.py --port $(PORT) --driver $(DRIVER_PATH)
+	python main.py --port $(PORT) --driver $(DRIVER_PATH)
 
 build-image:
 	@echo "Building container image ..."
