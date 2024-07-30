@@ -87,7 +87,7 @@ podman run --rm --network host -it quay.io/yaacov/rose-go-driver:latest --port 8
 # NOTE: will mount mydriver.py from local directory into the container file system
 podman run --rm --network host -it \
   -v $(pwd)/:/driver:z \
-  -e DRIVER=/driver/mydriver.py \\
+  -e DRIVER=/driver/mydriver.py \
   -e PORT=8081 \
   quay.io/rose/rose-game-ai-reference:latest
 ```
