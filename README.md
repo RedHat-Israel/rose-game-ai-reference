@@ -73,6 +73,14 @@ podman run --rm --network host -it quay.io/rose/rose-game-engine:latest
 podman run --rm --network host -it quay.io/rose/rose-game-web-ui:latest
 ```
 
+### Running community contributed driver ( on http://127.0.0.1:8082 )
+
+You can use community drivers to compare and evaluate your driver during the development process.
+
+``` bash
+podman run --rm --network host -it quay.io/yaacov/rose-go-driver:latest --port 8082
+```
+
 ### Running your self driving module, requires a local `driver.py` file with your driving module. ( on http://127.0.0.1:8081 )
 
 ``` bash
@@ -81,4 +89,41 @@ podman run --rm --network host -it \
   -v $(pwd)/:/driver:z \
   -e DRIVER=/driver/mydriver.py \
   quay.io/rose/rose-game-ai-reference:latest
+```
+
+### Testing your driver
+
+Send `car` and `track` information by uring `POST` request to your driver ( running on http://127.0.0.1:8081 ):
+
+``` bash
+curl -X POST -H "Content-Type: application/json" -d '{
+            "info": {
+                "car": {
+                    "x": 3,
+                    "y": 8
+                }
+            },
+            "track": [
+                ["", "", "bike", "", "", ""],
+                ["", "crack", "", "", "trash", ""],
+                ["", "", "penguin", "", "", "water"],
+                ["", "water", "", "trash", "", ""],
+                ["barrier", "", "", "", "bike", ""],
+                ["", "", "trash", "", "", ""],
+                ["", "crack", "", "", "", "bike"],
+                ["", "", "", "penguin", "water", ""],
+                ["", "", "bike", "", "", ""]
+            ]
+        }' http://localhost:8081/
+```
+
+The response in `JSON` format should include the car name and the recommended action:
+
+``` json
+{
+  "info": {
+    "name": "Go Cart",
+    "action": "pickup"
+  }
+}
 ```
