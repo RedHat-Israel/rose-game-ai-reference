@@ -24,6 +24,8 @@ except ImportError:
     print("       see: https://pytorch.org/get-started/locally/")
     exit()
 
+import json
+import os
 import random
 import argparse
 import torch.nn as nn
@@ -43,64 +45,39 @@ optimizer = None
 # Create model, loss function, and optimizer
 model = DriverModel()
 
+# Data storage
+inputs_data = []
+labels_data = []
 
-def generate_obstacle_array(width=6, height=4):
+
+def load_training_data(data_dir="data"):
     """
-    Generates a 2D array with random obstacles.
-
-    Parameters:
-        width (int): The width of the 2D array. Default is 6.
-        height (int): The height of the 2D array. Default is 4.
-
-    Returns:
-        list[list[str]]: 2D array with random obstacles.
-    """
-    OBSTACLES = ["", "crack", "trash", "penguin", "bike", "water", "barrier"]
-
-    array = [["" for _ in range(width)] for _ in range(height)]
-
-    for i in range(height):
-        obstacle = random.choice(OBSTACLES)
-        position = random.randint(0, width // 2 - 1)
-        # lane A
-        array[i][position] = obstacle
-        # lane B
-        array[i][width // 2 + position] = obstacle
-
-    return array
-
-
-def driver_simulator(array, car_x, width=6, height=4):
-    """
-    Simulates the driver's decision based on the obstacle in front of the car.
+    Load training data from JSON files in the data directory.
 
     Args:
-        array (list[list[str]]): 2D array representation of the world with obstacles as strings.
-        car_x (int): The car's x position.
-        width (int): The width of the 2D array. Default is 6.
-        height (int): The height of the 2D array. Default is 4.
+        data_dir (str): Directory containing the training data files
 
     Returns:
-        str: The determined action for the car to take. Possible actions include those defined in the `actions` class.
+        tuple: A tuple containing inputs_data and labels_data lists
     """
-    obstacle = array[height - 1][car_x]
+    inputs_file = os.path.join(data_dir, "inputs.json")
+    labels_file = os.path.join(data_dir, "labels.json")
 
-    # Define a dictionary to map obstacles to actions
-    action_map = {
-        obstacles.PENGUIN: actions.PICKUP,
-        obstacles.WATER: actions.BRAKE,
-        obstacles.CRACK: actions.JUMP,
-        obstacles.NONE: actions.NONE,
-    }
+    if not os.path.exists(inputs_file) or not os.path.exists(labels_file):
+        raise FileNotFoundError(
+            f"Training data files not found in {data_dir}/. Please run generate_data.py first."
+        )
 
-    # Determine the action based on the obstacle
-    action = action_map.get(obstacle)
+    print(f"Loading training data from {data_dir}/...")
 
-    # If the obstacle is not in the dictionary, determine the action based on the car's x position
-    if action is None:
-        action = actions.RIGHT if (car_x % (width // 2)) == 0 else actions.LEFT
+    with open(inputs_file, "r") as f:
+        inputs_data = json.load(f)
 
-    return action
+    with open(labels_file, "r") as f:
+        labels_data = json.load(f)
+
+    print(f"Loaded {len(inputs_data)} training samples")
+    return inputs_data, labels_data
 
 
 def action_to_outputs(action):
@@ -130,7 +107,7 @@ def action_to_outputs(action):
 
 def generate_batch(batch_size):
     """
-    Generates a batch of samples for training.
+    Generates a batch of samples for training from the loaded data.
 
     Args:
         batch_size (int): The number of samples in the batch.
@@ -138,16 +115,28 @@ def generate_batch(batch_size):
     Returns:
         tuple: A tuple containing two tensors. The first tensor contains the inputs for the model, and the second tensor contains the target outputs.
     """
+    if len(inputs_data) == 0:
+        raise ValueError(
+            "No training data loaded. Please call load_training_data() first."
+        )
+
     inputs = []
     targets = []
 
+    # Randomly sample from the loaded data
     for _ in range(batch_size):
-        car_x = random.randint(0, 5)
-        array = generate_obstacle_array()
-        correct_output = driver_simulator(array, car_x)
+        # Get a random sample from the loaded data
+        idx = random.randint(0, len(inputs_data) - 1)
+        sample_input = inputs_data[idx]
+        sample_label = labels_data[idx]
 
+        # Extract world array and car position
+        array = sample_input["world_array"]
+        car_x = sample_input["car_x"]
+
+        # Convert to tensors
         input_tensor = view_to_inputs(array, car_x)
-        target_tensor = action_to_outputs(correct_output)
+        target_tensor = action_to_outputs(sample_label)
 
         inputs.append(input_tensor)
         targets.append(target_tensor)
@@ -208,12 +197,20 @@ if __name__ == "__main__":
     parser.add_argument(
         "--learning-rate", type=float, default=0.001, help="Learning rate for training."
     )
+    parser.add_argument(
+        "--data-dir",
+        default="data",
+        help="Directory containing training data (default: data)",
+    )
     args = parser.parse_args()
 
     # Training parameters
     num_epochs = args.num_epochs
     batch_size = args.batch_size
     learning_rate = args.learning_rate
+
+    # Load training data
+    inputs_data, labels_data = load_training_data(args.data_dir)
 
     # Set loss function and backprpogation method
     criterion = nn.CrossEntropyLoss()
