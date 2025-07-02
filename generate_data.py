@@ -102,7 +102,7 @@ def query_driver_server(array, car_x, server_url, width=6, height=4, max_retries
     Returns:
         str: The action returned by the driver server.
     """
-    # Create the payload similar to the README example
+    # Create the payload
     payload = {
         "info": {"car": {"x": car_x, "y": height}},  # Car is at the bottom of the view
         "track": array,
